@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Electronic Product Search</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <h1>Daftar Produk Elektronik</h1>
+
+    <form action="/search" method="POST">
+      <input
+        type="text"
+        name="query"
+        placeholder="Ketik nama produk atau brand..."
+        required
+      />
+      <button type="submit">Cari</button>
+    </form>
+
+    <div class="table-wrapper">
+      <% if (results.length > 0) { %>
+      <table border="1" cellpadding="10" cellspacing="0">
+        <thead>
+          <tr>
+            <th>Nama Produk</th>
+            <th>Brand</th>
+            <th>Harga</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% results.forEach(product => { %>
+          <tr>
+            <td><%= product.name %></td>
+            <td><%= product.brand %></td>
+            <td>Rp<%= product.price.toLocaleString() %></td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+      <% } else { %>
+      <p>Belum ada produk yang tersedia.</p>
+      <% } %>
+    </div>
+  </body>
+</html>

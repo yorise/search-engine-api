@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Hasil Pencarian Produk</title>
+    <link rel="stylesheet" href="/results.css" />
+  </head>
+
+  <body>
+    <h1>Hasil Pencarian: "<%= query %>"</h1>
+
+    <!-- Tombol untuk menambah produk -->
+    <button onclick="openModal()">+ Tambah Produk</button>
+
+    <!-- Popup Tambah Product -->
+    <div id="productModal" class="modal">
+      <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h2>Tambah Produk Baru</h2>
+        <form action="/add-product" method="POST">
+          <label>Nama Produk:</label>
+          <input type="text" name="name" required /><br />
+
+          <label>Brand:</label>
+          <input type="text" name="brand" required /><br />
+
+          <label>Harga:</label>
+          <input type="number" name="price" required /><br />
+
+          <label>Total Stok:</label>
+          <input type="number" name="stock_total" required /><br />
+
+          <button type="submit">Simpan</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Popup Edit Produk -->
+    <div id="editModal" class="modal">
+      <div class="modal-content">
+        <span class="close" onclick="closeEditModal()">&times;</span>
+        <h2>Edit Produk</h2>
+        <form id="editForm" onsubmit="editProduct(event)">
+          <input type="hidden" name="id" id="editId" />
+
+          <label>Nama Produk:</label>
+          <input type="text" name="name" id="editName" required /><br />
+
+          <label>Brand:</label>
+          <input type="text" name="brand" id="editBrand" required /><br />
+
+          <label>Harga:</label>
+          <input type="number" name="price" id="editPrice" required /><br />
+
+          <label>Total Stok:</label>
+          <input
+            type="number"
+            name="stock_total"
+            id="editStock"
+            required
+          /><br />
+
+          <button type="submit">Simpan Perubahan</button>
+        </form>
+      </div>
+    </div>
+
+    <a href="/">Kembali ke pencarian</a>
+    <br />
+
+    <% if (results.length> 0) { %>
+    <table border="1" cellpadding="10" cellspacing="0">
+      <thead>
+        <tr>
+          <th>Nama Produk</th>
+          <th>Brand</th>
+          <th>Harga</th>
+          <th>Total Stok</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% results.forEach(product => { %>
+        <tr>
+          <td><%= product.name %></td>
+          <td><%= product.brand %></td>
+          <td>Rp<%= product.price.toLocaleString() %></td>
+          <td><%= product.stock_total %></td>
+          <td>
+            <div class="action-buttons">
+              <button
+                onclick="openEditModal(<%= product.id %>, '<%= product.name %>', '<%= product.brand %>', <%= product.price %>, <%= product.stock_total %>)"
+              >
+                Edit
+              </button>
+              <button onclick="deleteProduct(<%= product.id %>)">Hapus</button>
+            </div>
+          </td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+    <% } else { %>
+    <p>Tidak ditemukan produk yang cocok.</p>
+    <% } %>
+  </body>
+
+  <script>
+    function openModal() {
+      document.getElementById("productModal").style.display = "block";
+    }
+
+    function closeModal() {
+      document.getElementById("productModal").style.display = "none";
+    }
+
+    function closeEditModal() {
+      document.getElementById("editModal").style.display = "none";
+    }
+
+    function deleteProduct(id) {
+      if (confirm("Yakin ingin menghapus produk ini?")) {
+        fetch(`/product/${id}`, {
+          method: "DELETE",
+        }).then((response) => {
+          if (response.ok) {
+            alert("Produk berhasil dihapus");
+            location.reload(); // refresh hasil pencarian
+          } else {
+            alert("Gagal menghapus produk");
+          }
+        });
+      }
+    }
+
+    function editProduct(e) {
+      e.preventDefault();
+
+      const id = document.getElementById("editId").value;
+      const name = document.getElementById("editName").value;
+      const brand = document.getElementById("editBrand").value;
+      const price = document.getElementById("editPrice").value;
+      const stock_total = document.getElementById("editStock").value;
+
+      fetch(`/product/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name, brand, price, stock_total }),
+      })
+        .then((response) => {
+          if (response.ok) {
+            alert("Produk berhasil diedit");
+            closeEditModal();
+            location.reload(); // refresh hasil pencarian
+          } else {
+            alert("Gagal mengedit produk");
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          alert("Terjadi kesalahan saat mengedit produk");
+        });
+    }
+
+    window.onclick = function (event) {
+      const modal = document.getElementById("productModal");
+      if (event.target === modal) {
+        modal.style.display = "none";
+      }
+    };
+
+    function openEditModal(id, name, brand, price, stock_total) {
+      document.getElementById("editId").value = id;
+      document.getElementById("editName").value = name;
+      document.getElementById("editBrand").value = brand;
+      document.getElementById("editPrice").value = price;
+      document.getElementById("editStock").value = stock_total;
+      document.getElementById("editModal").style.display = "block";
+    }
+  </script>
+</html>
