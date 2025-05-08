@@ -59,22 +59,25 @@ Fitur yang tersedia:
 
 Contoh isi `.env`:
 
-````env
+```env
 DB_HOST=localhost
 DB_USER=your-db-username
 DB_PASSWORD=your-db-password
 DB_NAME=eproduct
 SECRET_KEY=your-secret-jwt-key
+```
 
 ---
 
 ## 🔐 Otentikasi & Keamanan
 
 - **Otentikasi dilakukan menggunakan JWT token**:
+
   - Token disimpan di **localStorage** browser.
   - Token ini kemudian dikirim dalam **Authorization header** untuk mengakses endpoint yang dilindungi.
 
 - **Middleware authenticate()**:
+
   - Digunakan untuk memverifikasi token dan memastikan user yang terautentikasi dapat mengakses endpoint tertentu seperti **Add**, **Edit**, dan **Delete** produk.
 
 - **Username disimpan di localStorage** untuk ditampilkan di frontend setelah login.
@@ -90,6 +93,8 @@ SECRET_KEY=your-secret-jwt-key
    ```bash
    git clone <URL_REPO>
    cd <folder_project>
+   ```
+
 ````
 
 2. **Install dependencies:**
@@ -137,13 +142,13 @@ SECRET_KEY=your-secret-jwt-key
 
 ## Fitur Tambahan
 
-- **Tombol Add, Edit, dan Delete hanya muncul saat user berhasil login**  
+- **Tombol Add, Edit, dan Delete hanya muncul saat user berhasil login**
   Tombol-tombol ini hanya dapat dilihat dan digunakan setelah user berhasil login. Hal ini menjamin bahwa hanya user yang telah terautentikasi yang dapat mengakses fitur pengelolaan produk.
 
-- **Username ditampilkan di UI setelah login**  
+- **Username ditampilkan di UI setelah login**
   Setelah berhasil login, username user akan ditampilkan di UI, memberikan informasi bahwa user sedang terautentikasi.
 
-- **Session hasil pencarian dipertahankan saat halaman di-reload**  
+- **Session hasil pencarian dipertahankan saat halaman di-reload**
   Hasil pencarian produk yang dilakukan oleh user akan disimpan dalam session, sehingga ketika halaman di-refresh, hasil pencarian tersebut tetap muncul tanpa harus melakukan pencarian ulang.
 
   ## Catatan Frontend (Client)
@@ -196,3 +201,4 @@ if (localStorage.getItem("token")) {
 ```
 
 ```
+````
