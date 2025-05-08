@@ -95,8 +95,6 @@ SECRET_KEY=your-secret-jwt-key
    cd <folder_project>
    ```
 
-````
-
 2. **Install dependencies:**
 
 ### Dependencies yang Diinstal
@@ -172,6 +170,8 @@ if (localStorage.getItem("token")) {
 }
 ```
 
+---
+
 # Rencana Pengembangan Lanjutan
 
 ## ✅ Middleware Role (admin/user)
@@ -197,8 +197,3 @@ if (localStorage.getItem("token")) {
 
 - Menambahkan fitur untuk mengupload gambar produk ke Cloud Storage (misalnya, Google Cloud Storage atau AWS S3).
 - Gambar produk yang diupload akan disimpan di cloud dan link gambar akan disimpan di database produk.
-
-```
-
-```
-````
