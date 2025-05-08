@@ -1,0 +1,78 @@
+body {
+  overflow: hidden;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f8f9fa;
+  padding: 40px;
+  color: #333;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+form {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+input[type="text"] {
+  padding: 10px;
+  width: 300px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+.table-wrapper {
+  width: 60%;
+  max-height: 450px; /* Atur tinggi sesuai kebutuhan layar */
+  overflow-y: auto;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+  margin: auto;
+}
+
+/* Table tetap lebar penuh */
+.table-wrapper table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* Header tetap menempel di atas saat scroll */
+.table-wrapper thead th {
+  position: sticky;
+  top: 0;
+  background-color: #007bff; /* Warna header kamu */
+  color: white;
+  z-index: 2;
+  text-align: left;
+  padding: 12px;
+  text-align: center; /* Horizontally center text */
+  vertical-align: middle; /* Vertically center text */
+}
+
+/* Style umum table */
+.table-wrapper td,
+.table-wrapper th {
+  padding: 12px;
+  border-bottom: 1px solid #ddd;
+  background-color: white;
+  text-align: center; /* Horizontally center text */
+  vertical-align: middle; /* Vertically center text */
+}

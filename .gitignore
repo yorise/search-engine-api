@@ -1,5 +1,6 @@
 # Node modules
 node_modules/
+*.json
 
 # Environment variables
 .env
@@ -7,12 +8,6 @@ node_modules/
 # Log files
 logs
 *.log
-
-# Database files
-db.js
-
-# Build files
-public/
 
 # IDE files
 .vscode/

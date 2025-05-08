@@ -2,23 +2,33 @@
 
 ## Deskripsi
 
-Proyek ini adalah implementasi **REST API** untuk **search engine produk elektronik**, dengan menggunakan **Node.js** dan **Express** sebagai server backend. API ini terhubung dengan **Google Cloud SQL** (MySQL) untuk pengelolaan data produk dan stok. Fitur yang tersedia antara lain pencarian produk, penambahan produk baru, pengeditan produk, dan penghapusan produk.
+Proyek ini adalah implementasi **REST API** untuk **search engine produk elektronik**, menggunakan **Node.js** dan **Express** sebagai backend. API ini terhubung dengan **Google Cloud SQL (MySQL)** untuk pengelolaan data produk dan stok.
+
+Fitur yang tersedia:
+
+- Login dan autentikasi menggunakan JWT
+- Pencarian produk elektronik
+- Menambah, mengedit, dan menghapus data produk (hanya tersedia saat login)
+- Session untuk menyimpan hasil pencarian produk
 
 ---
 
-## 🔧 Framework dan Teknologi yang Digunakan
+## 🔧 Teknologi yang Digunakan
 
-- **Node.js**: JavaScript runtime untuk server-side.
-- **Express.js**: Framework web untuk Node.js untuk membangun RESTful API.
-- **mysql2**: Untuk menghubungkan dan menjalankan query ke database **MySQL** di **Google Cloud SQL**.
-- **express-session**: Middleware untuk pengelolaan session, menyimpan data sementara hasil pencarian produk.
+- **Node.js**: Runtime JavaScript untuk backend
+- **Express.js**: Framework minimalis untuk membangun API
+- **mysql2**: Driver MySQL yang mendukung promise dan prepared statement
+- **bcrypt**: Untuk enkripsi dan verifikasi password
+- **jsonwebtoken**: Untuk pembuatan dan verifikasi token JWT
+- **express-session**: Menyimpan session pencarian produk
 
 ---
 
 ## ⚙️ Pengelolaan Data & Session
 
-- **Session** digunakan untuk menyimpan hasil pencarian sementara pada aplikasi.
-- Setelah melakukan aksi seperti **menambah**, **mengedit**, atau **menghapus** data, halaman akan direfresh, dan hasil pencarian sebelumnya tetap dapat ditampilkan berkat penggunaan session.
+- **Session** digunakan untuk menyimpan hasil pencarian produk terakhir.
+- Tombol **Add**, **Edit**, dan **Delete** hanya muncul saat user berhasil login.
+- Setelah login berhasil, halaman otomatis direfresh dan username ditampilkan.
 
 ---
 
@@ -26,8 +36,10 @@ Proyek ini adalah implementasi **REST API** untuk **search engine produk elektro
 
 - **POST (Search Engine & Add Product)**:
 
-  - **Format**: `x-www-form-urlencoded`
-  - Digunakan untuk pengiriman data form input (misal: pencarian produk, menambah produk).
+  - **Format**: `JSON (application/json)`
+  - Digunakan untuk pengiriman data form input (menambah produk).
+  - **Session**
+  - Menyimpan hasil pencarian di session untuk digunalkan kembali.
 
 - **PUT (Edit/Update Product)**:
 
@@ -41,22 +53,33 @@ Proyek ini adalah implementasi **REST API** untuk **search engine produk elektro
 
 ## 🔌 Koneksi ke Database Google Cloud SQL
 
-- **Google Cloud SQL** digunakan sebagai database untuk menyimpan informasi produk dan stok.
-- **Cloud SQL Proxy** digunakan untuk menghubungkan server dengan database di Google Cloud.
-- **Keamanan**:
-  - Koneksi diamankan menggunakan **file kunci API** dari Google Cloud.
-  - Pembatasan **IP akses** hanya diizinkan untuk server API, menghindari akses publik.
-  - **Konfigurasi `.env`** digunakan untuk menyimpan kredensial, bukan hardcode di dalam kode sumber.
+- Menggunakan database **MySQL** yang disimpan di **Google Cloud SQL**
+- Gunakan **Cloud SQL Proxy** untuk koneksi lokal
+- Informasi kredensial disimpan dalam `.env`
+
+Contoh isi `.env`:
+
+````env
+DB_HOST=localhost
+DB_USER=your-db-username
+DB_PASSWORD=your-db-password
+DB_NAME=eproduct
+SECRET_KEY=your-secret-jwt-key
 
 ---
 
-## 🔒 Keamanan Server
+## 🔐 Otentikasi & Keamanan
 
-- **Header Keamanan**:
-  - **CORS**: Mengatur izin akses dari domain tertentu.
-  - **Custom API Key**: Digunakan di header untuk memastikan hanya client yang sah yang dapat mengakses API.
+- **Otentikasi dilakukan menggunakan JWT token**:
+  - Token disimpan di **localStorage** browser.
+  - Token ini kemudian dikirim dalam **Authorization header** untuk mengakses endpoint yang dilindungi.
 
-Dengan langkah-langkah ini, aplikasi dilindungi dari akses yang tidak sah dan penyalahgunaan.
+- **Middleware authenticate()**:
+  - Digunakan untuk memverifikasi token dan memastikan user yang terautentikasi dapat mengakses endpoint tertentu seperti **Add**, **Edit**, dan **Delete** produk.
+
+- **Username disimpan di localStorage** untuk ditampilkan di frontend setelah login.
+
+- **Tombol Add, Edit, dan Delete** hanya muncul jika user telah login dan token valid.
 
 ---
 
@@ -67,13 +90,22 @@ Dengan langkah-langkah ini, aplikasi dilindungi dari akses yang tidak sah dan pe
    ```bash
    git clone <URL_REPO>
    cd <folder_project>
-   ```
+````
 
 2. **Install dependencies:**
 
-   ```bash
-    npm install
-   ```
+### Dependencies yang Diinstal
+
+- **express** – Web framework untuk Node.js
+- **mysql2** – Untuk koneksi ke database MySQL
+- **dotenv** – Untuk membaca variabel dari file `.env`
+- **bcrypt** – Untuk hashing password pengguna
+- **jsonwebtoken** – Untuk menghasilkan dan memverifikasi JWT token
+- **express-session** – Untuk menyimpan session di sisi server
+
+  ```bash
+   npm install
+  ```
 
 3. **Buat file .env untuk konfigurasi database:**
 
@@ -82,7 +114,7 @@ Dengan langkah-langkah ini, aplikasi dilindungi dari akses yang tidak sah dan pe
    DB_USER=your-db-username
    DB_PASSWORD=your-db-password
    DB_NAME=eproduct
-   API_KEY=my-secret-api-key
+   SECRET_KEY=your-secret-jwt-key
    ```
 
 4. **Jalankan aplikasi:**
@@ -95,9 +127,72 @@ Dengan langkah-langkah ini, aplikasi dilindungi dari akses yang tidak sah dan pe
 
 ## 📄 API Endpoints
 
+- **POST /login**: Login untuk mendapat akses menambah, mengedit, dan menghapus produk.
 - **GET /products**: Menampilkan daftar produk.
-- **POST /api/product**: Menambah produk baru.
-- **PUT /api/product/:id**: Mengedit produk berdasarkan ID.
-- **DELETE /api/product/:id**: Menghapus produk berdasarkan ID.
+- **POST /product**: Menambah produk baru.
+- **PUT /product/:id**: Mengedit produk berdasarkan ID.
+- **DELETE /product/:id**: Menghapus produk berdasarkan ID.
 
 ---
+
+## Fitur Tambahan
+
+- **Tombol Add, Edit, dan Delete hanya muncul saat user berhasil login**  
+  Tombol-tombol ini hanya dapat dilihat dan digunakan setelah user berhasil login. Hal ini menjamin bahwa hanya user yang telah terautentikasi yang dapat mengakses fitur pengelolaan produk.
+
+- **Username ditampilkan di UI setelah login**  
+  Setelah berhasil login, username user akan ditampilkan di UI, memberikan informasi bahwa user sedang terautentikasi.
+
+- **Session hasil pencarian dipertahankan saat halaman di-reload**  
+  Hasil pencarian produk yang dilakukan oleh user akan disimpan dalam session, sehingga ketika halaman di-refresh, hasil pencarian tersebut tetap muncul tanpa harus melakukan pencarian ulang.
+
+  ## Catatan Frontend (Client)
+
+### Menyimpan Token dan Username di LocalStorage Setelah Login
+
+Setelah pengguna login, token dan username akan disimpan di `localStorage` sebagai berikut:
+
+```js
+localStorage.setItem("token", data.token);
+localStorage.setItem("username", data.username);
+```
+
+### Pengecekan Token di LocalStorage
+
+Tombol Add, Edit, dan Delete hanya tampil jika token tersedia:
+
+```js
+if (localStorage.getItem("token")) {
+  // tampilkan tombol
+}
+```
+
+# Rencana Pengembangan Lanjutan
+
+## ✅ Middleware Role (admin/user)
+
+- Implementasi middleware untuk membatasi akses berdasarkan peran (role).
+- **Admin** dapat mengakses semua fitur (tambah, edit, hapus produk).
+- **User** hanya dapat melihat produk dan melakukan pencarian.
+
+## ✅ Pagination untuk Produk
+
+- Menambahkan fitur pagination pada endpoint yang menampilkan daftar produk (`GET /products`).
+- Memungkinkan pengguna untuk menampilkan produk dalam jumlah terbatas per halaman.
+
+## 🔜 Validasi Input Produk
+
+- Menambahkan validasi untuk memastikan data produk yang diterima melalui request POST dan PUT adalah valid.
+- Validasi meliputi:
+  - Nama produk tidak kosong
+  - Jenis produk sesuai pilihan
+  - Stok tidak negatif
+
+## 🔜 Upload Gambar Produk via Cloud Storage
+
+- Menambahkan fitur untuk mengupload gambar produk ke Cloud Storage (misalnya, Google Cloud Storage atau AWS S3).
+- Gambar produk yang diupload akan disimpan di cloud dan link gambar akan disimpan di database produk.
+
+```
+
+```

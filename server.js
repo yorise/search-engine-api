@@ -1,13 +1,14 @@
 const express = require("express");
 const pool = require("./db");
 const dotenv = require("dotenv");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 const app = express();
 const session = require("express-session");
 
 dotenv.config();
-const apiKeyAuth = require("./middleware/apiKeyAuth");
 
-app.use("/api", apiKeyAuth);
+const SECRET_KEY = process.env.JWT_SECRET;
 app.set("view engine", "ejs");
 app.use(express.json());
 app.use(express.static("public"));
@@ -21,6 +22,68 @@ app.use(
 );
 
 const PORT = process.env.PORT || 3000;
+
+// Route Login user
+app.post("/login", (req, res) => {
+  const { username, password } = req.body;
+
+  pool.query(
+    "SELECT * FROM users WHERE username = ?",
+    [username],
+    (err, results) => {
+      if (err) {
+        console.error("Login error:", err);
+        return res.status(500).json({ message: "Internal server error" });
+      }
+
+      if (results.length === 0) {
+        return res.status(401).json({ message: "User tidak ditemukan" });
+      }
+
+      const user = results[0];
+
+      // Bandingkan password menggunakan bcrypt
+      bcrypt.compare(password, user.password, (err, isMatch) => {
+        if (err) {
+          console.error("Compare error:", err);
+          return res
+            .status(500)
+            .json({ message: "Error saat membandingkan password" });
+        }
+
+        if (!isMatch) {
+          return res.status(401).json({ message: "Password salah" });
+        }
+
+        const token = jwt.sign(
+          { id: user.id, username: user.username },
+          SECRET_KEY,
+          { expiresIn: "2h" }
+        );
+
+        res.json({
+          token,
+          username: user.username,
+        });
+      });
+    }
+  );
+});
+
+// auth token route
+function authenticate(req, res, next) {
+  const authHeader = req.headers["authorization"];
+  console.log("Authorization Header:", authHeader);
+
+  const token = authHeader && authHeader.split(" ")[1];
+  if (!token) return res.sendStatus(401);
+
+  jwt.verify(token, SECRET_KEY, (err, user) => {
+    if (err) return res.sendStatus(403);
+    req.user = user;
+    next();
+  });
+}
 
 // Session untuk menyimpan query search
 app.use((req, res, next) => {
@@ -62,7 +125,7 @@ app.post("/search", (req, res) => {
 });
 
 //  Menambah produk
-app.post("/api/add-product", (req, res) => {
+app.post("/add-product", authenticate, (req, res) => {
   const { name, brand, price, stock_total } = req.body;
   const sql = `INSERT INTO products (name, brand, price, stock_total) VALUES (?, ?, ?, ?)`;
 
@@ -82,7 +145,7 @@ app.post("/api/add-product", (req, res) => {
 });
 
 // Mengedit produk
-app.put("/api/product/:id", (req, res) => {
+app.put("/product/:id", authenticate, (req, res) => {
   const { id } = req.params;
   const { name, brand, price, stock_total } = req.body;
 
@@ -98,7 +161,7 @@ app.put("/api/product/:id", (req, res) => {
 });
 
 // Menghapus produk
-app.delete("/api/product/:id", (req, res) => {
+app.delete("/product/:id", authenticate, (req, res) => {
   const { id } = req.params;
 
   const sql = `DELETE FROM products WHERE id = ?`;
